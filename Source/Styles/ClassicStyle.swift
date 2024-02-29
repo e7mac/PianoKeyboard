@@ -14,6 +14,7 @@ public struct ClassicStyle: KeyboardStyle {
     let cornerRadiusMultiplier: CGFloat
     let labelFont: Font
     let labelColor: Color
+    let highlightColor: Color
 
     public let naturalKeySpace: CGFloat
 
@@ -24,7 +25,8 @@ public struct ClassicStyle: KeyboardStyle {
         cornerRadiusMultiplier: CGFloat = 0.008,
         naturalKeySpace: CGFloat = 3,
         labelFont: Font = .title3.bold(),
-        labelColor: Color = .gray
+        labelColor: Color = .gray,
+        highlightColor: Color = .mint
     ) {
         self.sfKeyWidthMultiplier = sfKeyWidthMultiplier
         self.sfKeyHeightMultiplier = sfKeyHeightMultiplier
@@ -33,14 +35,15 @@ public struct ClassicStyle: KeyboardStyle {
         self.naturalKeySpace = naturalKeySpace
         self.labelFont = labelFont
         self.labelColor = labelColor
+        self.highlightColor = highlightColor
     }
 
-    public func naturalColor(_ down: Bool) -> Color {
-        down ? Color(red: 0.6, green: 0.6, blue: 0.6) : Color(red: 0.9, green: 0.9, blue: 0.9)
+    public func naturalColor(_ down: Bool, highlighted: Bool) -> Color {
+        highlighted ? highlightColor : down ? Color(red: 0.6, green: 0.6, blue: 0.6) : Color(red: 0.9, green: 0.9, blue: 0.9)
     }
 
-    public func sharpFlatColor(_ down: Bool) -> Color {
-        down ? Color(red: 0.4, green: 0.4, blue: 0.4) : Color(red: 0.5, green: 0.5, blue: 0.5)
+    public func sharpFlatColor(_ down: Bool, highlighted: Bool) -> Color {
+        highlighted ? highlightColor : down ? Color(red: 0.4, green: 0.4, blue: 0.4) : Color(red: 0.5, green: 0.5, blue: 0.5)
     }
 
     public func labelColor(_ noteNumber: Int) -> Color {
@@ -76,7 +79,7 @@ public struct ClassicStyle: KeyboardStyle {
                     .path(in: rect)
 
                 let gradient = Gradient(colors: [
-                    naturalColor(key.touchDown),
+                    naturalColor(key.touchDown, highlighted: viewModel.highlightedKeys.contains(key.noteNumber)),
                     Color(red: 1, green: 1, blue: 1),
                 ])
 
@@ -130,7 +133,7 @@ public struct ClassicStyle: KeyboardStyle {
 
                 let gradientInset = Gradient(colors: [
                     Color(red: 0.3, green: 0.3, blue: 0.3),
-                    sharpFlatColor(key.touchDown),
+                    sharpFlatColor(key.touchDown, highlighted: viewModel.highlightedKeys.contains(key.noteNumber)),
                 ])
                 
                 context.fill(pathInset, with: .linearGradient(

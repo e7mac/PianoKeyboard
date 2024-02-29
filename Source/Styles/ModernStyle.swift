@@ -12,11 +12,11 @@ public struct ModernStyle: KeyboardStyle {
 
     public init() {}
 
-    public func naturalColor(_ down: Bool) -> Color {
+    public func naturalColor(_ down: Bool, highlighted: Bool) -> Color {
         down ? Color(red: 0.6, green: 0.6, blue: 0.6) : Color(red: 0.9, green: 0.9, blue: 0.9)
     }
 
-    public func sharpFlatColor(_ down: Bool) -> Color {
+    public func sharpFlatColor(_ down: Bool, highlighted: Bool) -> Color {
         down ? Color(red: 0.4, green: 0.4, blue: 0.4) : Color(red: 0.2, green: 0.2, blue: 0.2)
     }
 
@@ -50,7 +50,7 @@ public struct ModernStyle: KeyboardStyle {
                 let path = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius)
                     .path(in: rect)
 
-                let backColor = key.isNatural ? naturalColor(key.touchDown) : sharpFlatColor(key.touchDown)
+                let backColor = key.isNatural ? naturalColor(key.touchDown, highlighted: viewModel.highlightedKeys.contains(key.noteNumber)) : sharpFlatColor(key.touchDown, highlighted: viewModel.highlightedKeys.contains(key.noteNumber))
                 context.fill(path, with: .color(backColor))
 
                 if viewModel.showLabels {

@@ -16,6 +16,7 @@ public class PianoKeyboardViewModel: ObservableObject, PianoKeyViewModelDelegate
     @Published public var keys: [PianoKeyViewModel] = []
     @Published public var noteOffset = 60
     @Published public var showLabels = false
+    @Published public var highlightedKeys: [Int] = []
     @Published public var latch = false {
         didSet { reset() }
     }
