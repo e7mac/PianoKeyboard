@@ -89,10 +89,10 @@ public struct ClassicStyle: KeyboardStyle {
                     endPoint: CGPoint(x: rect.width / 2.0, y: rect.height)
                 ))
 
-                if viewModel.showLabels {
-                    let color = key.name.prefix(1) == "C" ? labelColor : .clear
+                if shouldShowLabel(viewModel: viewModel, noteNumber: key.noteNumber) {
+                    let color = labelColor
                     context.draw(
-                        Text(key.name).font(labelFont).foregroundColor(color),
+                        Text(key.pitchClass).font(labelFont).foregroundColor(color),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.88)
                     )
                 }
@@ -142,8 +142,19 @@ public struct ClassicStyle: KeyboardStyle {
                     endPoint: CGPoint(x: rect.width / 2.0, y: rect.height)
                 ))
 
+                if shouldShowLabel(viewModel: viewModel, noteNumber: key.noteNumber) {
+                    let color = labelColor
+                    context.draw(
+                        Text(key.pitchClass).font(labelFont).foregroundColor(color),
+                        at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.8)
+                    )
+                }
+
                 viewModel.keyRects[index] = rect.offsetBy(dx: xg, dy: yg)
             }
         }
+    }
+    private func shouldShowLabel(viewModel: PianoKeyboardViewModel, noteNumber: Int) -> Bool {
+        return viewModel.showLabels || viewModel.showLabelsOnHighlight && viewModel.highlightedKeys.contains(noteNumber)
     }
 }

@@ -31,4 +31,10 @@ public struct Note {
         let note = preferSharps ? sharps[offset] : flats[offset]
         return note + String(octave)
     }
+    
+    public static func pitchClass(for midiNumber: Int, preferSharps: Bool = false) -> String {
+        let offset = midiNumber % 12
+        let note = preferSharps ? sharps[offset] : flats[offset]
+        return note
+    }
 }

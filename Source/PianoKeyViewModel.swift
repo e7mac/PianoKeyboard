@@ -29,6 +29,10 @@ public struct PianoKeyViewModel: Identifiable {
         Note.name(for: noteNumber)
     }
 
+    public var pitchClass: String {
+        Note.pitchClass(for: noteNumber)
+    }
+
     public var isNatural: Bool {
         let k = noteNumber % 12
         return (k == 0 || k == 2 || k == 4 || k == 5 || k == 7 || k == 9 || k == 11)
