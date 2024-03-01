@@ -16,6 +16,7 @@ public struct PianoKeyViewModel: Identifiable {
     let delegate: PianoKeyViewModelDelegateProtocol
     public var touchDown = false
     public var latched = false
+    public var preferSharps = false
 
     public var id: Int {
         noteNumber
@@ -26,11 +27,11 @@ public struct PianoKeyViewModel: Identifiable {
     }
 
     public var name: String {
-        Note.name(for: noteNumber)
+        Note.name(for: noteNumber, preferSharps: preferSharps)
     }
 
     public var pitchClass: String {
-        Note.pitchClass(for: noteNumber)
+        Note.pitchClass(for: noteNumber, preferSharps: preferSharps)
     }
 
     public var isNatural: Bool {

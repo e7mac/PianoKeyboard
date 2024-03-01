@@ -18,6 +18,9 @@ public class PianoKeyboardViewModel: ObservableObject, PianoKeyViewModelDelegate
     @Published public var showLabels = false
     @Published public var showLabelsOnHighlight = false
     @Published public var highlightedKeys: [Int] = []
+    @Published public var preferSharps: Bool = false {
+        didSet { configureKeys() }
+    }
     @Published public var latch = false {
         didSet { reset() }
     }
@@ -47,11 +50,11 @@ public class PianoKeyboardViewModel: ObservableObject, PianoKeyViewModelDelegate
     }
 
     private func configureKeys() {
-        keys = Array(repeating: PianoKeyViewModel(keyIndex: 0, delegate: self), count: numberOfKeys)
+        keys = Array(repeating: PianoKeyViewModel(keyIndex: 0, delegate: self, preferSharps: preferSharps), count: numberOfKeys)
         keyRects = Array(repeating: .zero, count: numberOfKeys)
 
         for i in 0..<numberOfKeys {
-            keys[i] = PianoKeyViewModel(keyIndex: i, delegate: self)
+            keys[i] = PianoKeyViewModel(keyIndex: i, delegate: self, preferSharps: preferSharps)
         }
     }
 
