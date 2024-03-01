@@ -35,7 +35,9 @@ public class PianoKeyboardViewModel: ObservableObject, PianoKeyViewModelDelegate
         didSet { updateKeys() }
     }
 
-    public init(showLabelsOnHighlight: Bool = false) {
+    public init(numberOfKeys: Int = 18, showLabels: Bool = false, showLabelsOnHighlight: Bool = false) {
+        self.numberOfKeys = numberOfKeys
+        self.showLabels = showLabels
         self.showLabelsOnHighlight = showLabelsOnHighlight
         configureKeys()
     }
