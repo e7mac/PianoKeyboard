@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  NoteTests.swift
+//  PianoKeyboardTests
 //
 //  Created by Gary Newby on 05/04/2023.
 //

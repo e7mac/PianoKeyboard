@@ -26,7 +26,7 @@ public struct ClassicStyle: KeyboardStyle {
         naturalKeySpace: CGFloat = 3,
         labelFont: Font = .title3.bold(),
         labelColor: Color = .gray,
-        showLabels: Bool = false
+        showLabels: Bool = true
     ) {
         self.sfKeyWidthMultiplier = sfKeyWidthMultiplier
         self.sfKeyHeightMultiplier = sfKeyHeightMultiplier

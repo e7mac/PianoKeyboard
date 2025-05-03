@@ -9,7 +9,7 @@ import SwiftUI
 import PianoKeyboard
 
 struct ContentView: View {
-    @ObservedObject private var pianoKeyboardViewModel: PianoKeyboardViewModel
+    @ObservedObject private var viewModel: PianoKeyboardViewModel
     @State var styleIndex: Int
 
     private let audioEngine: AudioEngine
@@ -19,16 +19,14 @@ struct ContentView: View {
         audioEngine: AudioEngine = AudioEngine(),
         styleIndex: Int = 0
     ) {
-        self.pianoKeyboardViewModel = pianoKeyboardViewModel
+        self.viewModel = pianoKeyboardViewModel
         self.styleIndex = styleIndex
         self.audioEngine = audioEngine
-
-        pianoKeyboardViewModel.showLabels = true
     }
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 0) {
-            ZStack {
+        VStack(spacing: 0) {
+            ZStack(alignment: .bottom) {
                 Rectangle()
                     .fill(
                         LinearGradient(gradient: Gradient(stops: [
@@ -39,48 +37,68 @@ struct ContentView: View {
                     )
                     .shadow(radius: 8)
 
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading) {
-                        Stepper("Keys: \(pianoKeyboardViewModel.numberOfKeys)") {
-                            pianoKeyboardViewModel.numberOfKeys += 1
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Stepper("Keys: \(viewModel.numberOfKeys)") {
+                            viewModel.numberOfKeys += 1
                         } onDecrement: {
-                            pianoKeyboardViewModel.numberOfKeys -= 1
+                            viewModel.numberOfKeys -= 1
                         }
-                        .font(.body.bold())
+                        .font(.subheadline.bold())
                         .foregroundColor(.white)
-
-                        Toggle("Latch:", isOn: $pianoKeyboardViewModel.latch)
-                            .font(.body.bold())
-                            .foregroundColor(.white)
 
                         Stepper("Style:", value: $styleIndex, in: 0...2)
-                            .font(.body.bold())
+                            .font(.subheadline.bold())
                             .foregroundColor(.white)
                             .tint(.blue)
+
                     }
-                    .frame(width: 190)
+                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 0))
+                    .frame(width: 200)
+
+
+                    VStack {
+                        Toggle("Latch:", isOn: $viewModel.latch)
+                            .font(.subheadline.bold())
+                            .foregroundColor(.white)
+
+                        HStack {
+                            Text("Notes:")
+                                .font(.subheadline.bold())
+                                .foregroundStyle(.white)
+                            Spacer()
+                            Text("\(viewModel.keysPressed.joined(separator: ", "))")
+                                .font(.subheadline.bold())
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 0))
+                    .frame(width: 200)
+
                     Spacer()
+
                     Text("PianoKeyboard")
-                        .font(.largeTitle.bold())
+                        .font(.title2.bold())
                         .foregroundColor(.white)
+                        .padding(30)
                 }
-                .padding(EdgeInsets(top: 0, leading: 50, bottom: 0, trailing: 30))
             }
+            .frame(height: UIScreen.main.bounds.height * 0.45)
 
             if styleIndex == 0 {
-                PianoKeyboardView(viewModel: pianoKeyboardViewModel, style: ClassicStyle(sfKeyWidthMultiplier: 0.55))
-                    .frame(height: 230)
+                PianoKeyboardView(viewModel: viewModel, style: ClassicStyle(sfKeyWidthMultiplier: 0.55))
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
             } else if styleIndex == 1 {
-                PianoKeyboardView(viewModel: pianoKeyboardViewModel, style: ModernStyle())
-                    .frame(height: 230)
+                PianoKeyboardView(viewModel: viewModel, style: ModernStyle())
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
             } else if styleIndex == 2{
-                PianoKeyboardView(viewModel: pianoKeyboardViewModel, style: CustomStyle())
-                    .frame(height: 230)
+                PianoKeyboardView(viewModel: viewModel, style: CustomStyle(showLabels: true))
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
             }
         }
-        .ignoresSafeArea()
+        .background(.black)
         .onAppear() {
-            pianoKeyboardViewModel.delegate = audioEngine
+            viewModel.delegate = audioEngine
             audioEngine.start()
         }
     }
@@ -88,9 +106,10 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationStack {
+        NavigationView {
             ContentView()
         }
+        .navigationViewStyle(.stack)
         .previewInterfaceOrientation(.landscapeLeft)
     }
 }

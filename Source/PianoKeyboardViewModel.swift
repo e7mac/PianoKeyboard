@@ -13,13 +13,14 @@ public protocol PianoKeyboardDelegate: AnyObject {
 }
 
 public class PianoKeyboardViewModel: ObservableObject {
-    private let noteOffset: Int
     
     @Published public var keys: [PianoKeyViewModel] = []
+    @Published public var keysPressed: [String] = []
     @Published public var latch = false {
         didSet { reset() }
     }
 
+    private let noteOffset: Int
     public var keyRects: [CGRect] = []
     public weak var delegate: PianoKeyboardDelegate?
     public var numberOfKeys = 18 {
@@ -65,35 +66,49 @@ public class PianoKeyboardViewModel: ObservableObject {
 
             if keys[index].touchDown != keyDownAt[index] {
                 if latch {
-                    let keyLatched = keys[index].latched
-
-                    if keyDownAt[index] && keyLatched {
-                        delegate?.pianoKeyUp(noteNumber)
-                        keys[index].latched = false
-                        keys[index].touchDown = false
-                    }
-                    if keyDownAt[index] && !keyLatched {
-                        delegate?.pianoKeyDown(noteNumber)
-                        keys[index].latched = true
-                        keys[index].touchDown = true
+                    if keyDownAt[index] {
+                        let keyLatched = keys[index].latched
+                        if keyLatched {
+                            keyUp(noteNumber)
+                            keys[index].latched = false
+                            keys[index].touchDown = false
+                        } else {
+                            keyDown(noteNumber)
+                            keys[index].latched = true
+                            keys[index].touchDown = true
+                        }
                     }
 
                 } else {
                     if keyDownAt[index] {
-                        delegate?.pianoKeyDown(noteNumber)
+                        keyDown(noteNumber)
                     } else {
-                        delegate?.pianoKeyUp(noteNumber)
+                        keyUp(noteNumber)
                     }
                     keys[index].touchDown = keyDownAt[index]
                 }
             } else {
                 if keys[index].touchDown && keyDownAt[index] && keys[index].latched {
-                    delegate?.pianoKeyUp(noteNumber)
+                    keyUp(noteNumber)
                     keys[index].latched = false
                     keys[index].touchDown = false
                 }
             }
         }
+    }
+
+    private func keyDown(_ number: Int) {
+        keysPressed.append(Note.name(for: number))
+        delegate?.pianoKeyDown(number)
+    }
+
+    private func keyUp(_ number: Int) {
+        let note = Note.name(for: number)
+        guard let index = keysPressed.firstIndex(of: note) else {
+            return
+        }
+        keysPressed.remove(at: index)
+        delegate?.pianoKeyUp(number)
     }
 
     private func getKeyContaining(_ point: CGPoint) -> Int? {
@@ -113,7 +128,7 @@ public class PianoKeyboardViewModel: ObservableObject {
         for i in 0..<numberOfKeys {
             keys[i].touchDown = false
             keys[i].latched = false
-            delegate?.pianoKeyUp(keys[i].noteNumber)
+            keyUp(keys[i].noteNumber)
         }
     }
 }

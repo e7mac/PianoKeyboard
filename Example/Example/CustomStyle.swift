@@ -9,9 +9,8 @@ import SwiftUI
 import PianoKeyboard
 
 public struct CustomStyle: KeyboardStyle {
+    public var showLabels: Bool = false
     public let naturalKeySpace: CGFloat = 2
-
-    public init() {}
 
     public func naturalColor(_ down: Bool) -> Color {
         down ? Color(red: 0.6, green: 0.6, blue: 0.6) : Color(red: 0.4, green: 0.4, blue: 0.9)
@@ -52,7 +51,7 @@ public struct CustomStyle: KeyboardStyle {
                 let backColor = key.isNatural ? naturalColor(key.touchDown) : sharpFlatColor(key.touchDown)
                 context.fill(path, with: .color(backColor))
 
-                if viewModel.showLabels {
+                if showLabels {
                     context.draw(
                         Text(key.name)
                             .font(.subheadline.bold())
