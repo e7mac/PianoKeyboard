@@ -35,6 +35,9 @@ public struct CustomStyle: KeyboardStyle {
             let xg = geometry.frame(in: .global).origin.x
             let yg = geometry.frame(in: .global).origin.y
 
+            // Background
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.gray))
+
             // Natural + sharp/flat keys
             let naturalWidth = naturalKeyWidth(width, naturalKeyCount: viewModel.naturalKeyCount, space: naturalKeySpace)
             let naturalXIncr = naturalWidth + naturalKeySpace

@@ -25,7 +25,7 @@ public struct PianoKeyboardView<T: KeyboardStyle>: View {
                 style.layout(viewModel: viewModel, geometry: geometry)
                 TouchesView(viewModel: viewModel)
             }
-            .background(viewModel.backgroundColor)
+            .background(.black)
         }
     }
 }
