@@ -19,6 +19,7 @@ public class PianoKeyboardViewModel: ObservableObject {
     @Published public var latch = false {
         didSet { reset() }
     }
+    @Published public var backgroundColor: Color = .black
 
     private let noteOffset: Int
     public var keyRects: [CGRect] = []

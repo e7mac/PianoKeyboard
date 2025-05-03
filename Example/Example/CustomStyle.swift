@@ -64,6 +64,5 @@ public struct CustomStyle: KeyboardStyle {
                 viewModel.keyRects[index] = rect.offsetBy(dx: xg, dy: yg)
             }
         }
-        .background(.black)
     }
 }
