@@ -31,4 +31,11 @@ public struct Note {
         let note = preferSharps ? sharps[offset] : flats[offset]
         return note + String(octave)
     }
+    
+    public static func name(for midiNumber: Int, useFlats: Bool = false, showOctaveNumber: Bool = true) -> String {
+        let offset = midiNumber % 12
+        let octave = ((midiNumber - offset) / 12) - 1
+        let note = useFlats ? flats[offset] : sharps[offset]
+        return showOctaveNumber ? note + String(octave) : note
+    }
 }

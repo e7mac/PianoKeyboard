@@ -63,11 +63,15 @@ public struct ModernStyle: KeyboardStyle {
                     context.fill(highlightPath, with: .color(highlightColor))
                 }
 
-                if showLabels {
+                // Handle note names
+                if let noteName = viewModel.noteName(for: key.noteNumber) {
                     context.draw(
-                        Text(key.name)
-                            .font(.caption)
-                            .foregroundColor(key.isNatural ? .black : .white),
+                        Text(noteName),
+                        at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height - 25)
+                    )
+                } else if showLabels {
+                    context.draw(
+                        Text(key.name),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height - 25)
                     )
                 }

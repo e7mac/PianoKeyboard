@@ -98,6 +98,47 @@ struct ContentView: View {
                         .font(.subheadline.bold())
                         .foregroundColor(.white)
                         .padding(.top, 5)
+                        
+                        Toggle("Show Notes:", isOn: $viewModel.showNoteNames)
+                            .font(.subheadline.bold())
+                            .foregroundColor(.white)
+                            .padding(.top, 5)
+                        
+                        if viewModel.showNoteNames {
+                            Toggle("Use Flats:", isOn: $viewModel.useFlats)
+                                .font(.subheadline.bold())
+                                .foregroundColor(.white)
+                            
+                            Toggle("Show Octaves:", isOn: $viewModel.showOctaveNumbers)
+                                .font(.subheadline.bold())
+                                .foregroundColor(.white)
+                            
+                            Toggle("Only on Highlight:", isOn: $viewModel.showLabelsOnHighlight)
+                                .font(.subheadline.bold())
+                                .foregroundColor(.white)
+                        }
+                        
+                        Button("Set Custom Names") {
+                            viewModel.customNoteNames = [
+                                60: "Do",
+                                62: "Re",
+                                64: "Mi",
+                                65: "Fa",
+                                67: "Sol",
+                                69: "La",
+                                71: "Si"
+                            ]
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .padding(.top, 5)
+                        
+                        Button("Clear Custom Names") {
+                            viewModel.customNoteNames = [:]
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .padding(.top, 5)
                     }
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 0))
                     .frame(width: 200)
@@ -114,12 +155,17 @@ struct ContentView: View {
 
             if styleIndex == 0 {
                 PianoKeyboardView(viewModel: viewModel, style: ClassicStyle(sfKeyWidthMultiplier: 0.55))
+                    .font(.headline)
                     .frame(height: UIScreen.main.bounds.height * 0.55)
             } else if styleIndex == 1 {
                 PianoKeyboardView(viewModel: viewModel, style: ModernStyle())
+                    .font(.caption.bold())
+                    .foregroundColor(.purple)
                     .frame(height: UIScreen.main.bounds.height * 0.55)
             } else if styleIndex == 2{
-                PianoKeyboardView(viewModel: viewModel, style: CustomStyle(showLabels: true))
+                PianoKeyboardView(viewModel: viewModel, style: CustomStyle(showLabels: !viewModel.showNoteNames))
+                    .font(.title3)
+                    .foregroundColor(.yellow)
                     .frame(height: UIScreen.main.bounds.height * 0.55)
             }
         }

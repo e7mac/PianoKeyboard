@@ -17,6 +17,11 @@ public class PianoKeyboardViewModel: ObservableObject {
     @Published public var keys: [PianoKeyViewModel] = []
     @Published public var keysPressed: [String] = []
     @Published public var highlightedKeys: [Int: Color] = [:]
+    @Published public var showNoteNames: Bool = false
+    @Published public var useFlats: Bool = false
+    @Published public var showOctaveNumbers: Bool = false
+    @Published public var showLabelsOnHighlight: Bool = false
+    @Published public var customNoteNames: [Int: String] = [:]
     @Published public var latch = false {
         didSet { reset() }
     }
@@ -133,5 +138,20 @@ public class PianoKeyboardViewModel: ObservableObject {
             keys[i].latched = false
             keyUp(keys[i].noteNumber)
         }
+    }
+    
+    public func noteName(for noteNumber: Int) -> String? {
+        // Check if we should show labels only on highlighted keys
+        if showLabelsOnHighlight && highlightedKeys[noteNumber] == nil {
+            return nil
+        }
+        
+        // Priority: custom names > note names > none
+        if let customName = customNoteNames[noteNumber] {
+            return customName
+        } else if showNoteNames {
+            return Note.name(for: noteNumber, useFlats: useFlats, showOctaveNumber: showOctaveNumbers)
+        }
+        return nil
     }
 }

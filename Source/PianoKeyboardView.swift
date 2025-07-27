@@ -24,6 +24,11 @@ public struct PianoKeyboardView<T: KeyboardStyle>: View {
             ZStack(alignment: .top) {
                 style.layout(viewModel: viewModel, geometry: geometry)
                     .animation(.easeInOut(duration: 0.3), value: viewModel.highlightedKeys)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.showNoteNames)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.useFlats)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.showOctaveNumbers)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.showLabelsOnHighlight)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.customNoteNames)
                 TouchesView(viewModel: viewModel)
             }
             .background(.black)
@@ -40,10 +45,14 @@ public struct PianoKeyboardView<T: KeyboardStyle>: View {
         66: .orange,  // F# (black key)
         67: .red      // G (white key)
     ]
+    viewModel.showNoteNames = true
     
     return VStack {
         PianoKeyboardView(viewModel: viewModel, style: ClassicStyle())
+            .font(.title3.bold())
+            .foregroundColor(.blue)
         PianoKeyboardView(viewModel: viewModel, style: ModernStyle())
+            .font(.caption2)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     .background(.black)

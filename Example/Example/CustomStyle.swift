@@ -59,11 +59,15 @@ public struct CustomStyle: KeyboardStyle {
                     context.fill(path, with: .color(highlightColor))
                 }
 
-                if showLabels {
+                // Handle note names
+                if let noteName = viewModel.noteName(for: key.noteNumber) {
                     context.draw(
-                        Text(key.name)
-                            .font(.subheadline.bold())
-                            .foregroundColor(.white),
+                        Text(noteName),
+                        at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.midY)
+                    )
+                } else if showLabels {
+                    context.draw(
+                        Text(key.name),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.midY)
                     )
                 }

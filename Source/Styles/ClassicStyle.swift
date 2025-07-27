@@ -96,7 +96,13 @@ public struct ClassicStyle: KeyboardStyle {
                     context.fill(highlightPath, with: .color(highlightColor))
                 }
 
-                if showLabels {
+                // Handle note names
+                if let noteName = viewModel.noteName(for: key.noteNumber) {
+                    context.draw(
+                        Text(noteName),
+                        at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.85)
+                    )
+                } else if showLabels {
                     let color = key.name.prefix(1) == "C" ? labelColor : .clear
                     context.draw(
                         Text(key.name).font(labelFont).foregroundColor(color),
@@ -154,6 +160,14 @@ public struct ClassicStyle: KeyboardStyle {
                     let highlightPath = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius / 2.0)
                         .path(in: insetRect)
                     context.fill(highlightPath, with: .color(highlightColor))
+                }
+                
+                // Draw note names on black keys
+                if let noteName = viewModel.noteName(for: key.noteNumber) {
+                    context.draw(
+                        Text(noteName),
+                        at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.75)
+                    )
                 }
 
                 viewModel.keyRects[index] = rect.offsetBy(dx: xg, dy: yg)
