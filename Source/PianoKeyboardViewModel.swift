@@ -16,6 +16,7 @@ public class PianoKeyboardViewModel: ObservableObject {
     
     @Published public var keys: [PianoKeyViewModel] = []
     @Published public var keysPressed: [String] = []
+    @Published public var highlightedKeys: [Int: Color] = [:]
     @Published public var latch = false {
         didSet { reset() }
     }

@@ -23,6 +23,7 @@ public struct PianoKeyboardView<T: KeyboardStyle>: View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 style.layout(viewModel: viewModel, geometry: geometry)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.highlightedKeys)
                 TouchesView(viewModel: viewModel)
             }
             .background(.black)
@@ -31,9 +32,18 @@ public struct PianoKeyboardView<T: KeyboardStyle>: View {
 }
 
 #Preview {
-    VStack {
-        PianoKeyboardView(style: ClassicStyle())
-        PianoKeyboardView(style: ModernStyle())
+    let viewModel = PianoKeyboardViewModel()
+    viewModel.highlightedKeys = [
+        60: .blue,    // C (white key)
+        61: .purple,  // C# (black key)
+        64: .green,   // E (white key)
+        66: .orange,  // F# (black key)
+        67: .red      // G (white key)
+    ]
+    
+    return VStack {
+        PianoKeyboardView(viewModel: viewModel, style: ClassicStyle())
+        PianoKeyboardView(viewModel: viewModel, style: ModernStyle())
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     .background(.black)

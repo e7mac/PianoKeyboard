@@ -71,6 +71,33 @@ struct ContentView: View {
                                 .font(.subheadline.bold())
                                 .foregroundStyle(.white)
                         }
+                        
+                        Button("Highlight C Major") {
+                            viewModel.highlightedKeys = [60: .blue.opacity(0.3), 64: .green.opacity(0.3), 67: .red.opacity(0.3)]
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .padding(.top, 5)
+                        
+                        Button("Highlight with Black Keys") {
+                            viewModel.highlightedKeys = [
+                                60: .blue.opacity(0.3),    // C
+                                61: .purple.opacity(0.4),  // C# (black key)
+                                62: .green.opacity(0.3),   // D
+                                63: .orange.opacity(0.4),  // D# (black key)
+                                64: .yellow.opacity(0.3)   // E
+                            ]
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .padding(.top, 5)
+                        
+                        Button("Clear Highlights") {
+                            viewModel.highlightedKeys = [:]
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .padding(.top, 5)
                     }
                     .padding(EdgeInsets(top: 0, leading: 20, bottom: 30, trailing: 0))
                     .frame(width: 200)

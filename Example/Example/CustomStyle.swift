@@ -53,6 +53,11 @@ public struct CustomStyle: KeyboardStyle {
 
                 let backColor = key.isNatural ? naturalColor(key.touchDown) : sharpFlatColor(key.touchDown)
                 context.fill(path, with: .color(backColor))
+                
+                // Draw highlight overlay if key is highlighted
+                if let highlightColor = viewModel.highlightedKeys[key.noteNumber] {
+                    context.fill(path, with: .color(highlightColor))
+                }
 
                 if showLabels {
                     context.draw(

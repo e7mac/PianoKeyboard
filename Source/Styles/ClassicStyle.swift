@@ -88,6 +88,13 @@ public struct ClassicStyle: KeyboardStyle {
                     startPoint: CGPoint(x: rect.width / 2.0, y: 0),
                     endPoint: CGPoint(x: rect.width / 2.0, y: rect.height)
                 ))
+                
+                // Draw highlight overlay if key is highlighted
+                if let highlightColor = viewModel.highlightedKeys[key.noteNumber] {
+                    let highlightPath = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius)
+                        .path(in: rect)
+                    context.fill(highlightPath, with: .color(highlightColor))
+                }
 
                 if showLabels {
                     let color = key.name.prefix(1) == "C" ? labelColor : .clear
@@ -141,6 +148,13 @@ public struct ClassicStyle: KeyboardStyle {
                     startPoint: CGPoint(x: rect.width / 2.0, y: 0),
                     endPoint: CGPoint(x: rect.width / 2.0, y: rect.height)
                 ))
+                
+                // Draw highlight overlay if key is highlighted
+                if let highlightColor = viewModel.highlightedKeys[key.noteNumber] {
+                    let highlightPath = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius / 2.0)
+                        .path(in: insetRect)
+                    context.fill(highlightPath, with: .color(highlightColor))
+                }
 
                 viewModel.keyRects[index] = rect.offsetBy(dx: xg, dy: yg)
             }
