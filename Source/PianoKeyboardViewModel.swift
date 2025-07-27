@@ -20,7 +20,9 @@ public class PianoKeyboardViewModel: ObservableObject {
         didSet { reset() }
     }
 
-    private let noteOffset: Int
+    public var noteOffset: Int {
+        didSet { configureKeys() }
+    }
     public var keyRects: [CGRect] = []
     public weak var delegate: PianoKeyboardDelegate?
     public var numberOfKeys = 18 {
