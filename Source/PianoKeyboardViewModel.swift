@@ -167,7 +167,7 @@ public class PianoKeyboardViewModel: ObservableObject {
         if showLabelsOnHighlight && highlightedKeys[noteNumber] == nil {
             return nil
         }
-        
+
         // Priority: custom names > note names > none
         if let customName = customNoteNames[noteNumber] {
             return customName
@@ -175,5 +175,38 @@ public class PianoKeyboardViewModel: ObservableObject {
             return Note.name(for: noteNumber, useFlats: useFlats, showOctaveNumber: showOctaveNumbers)
         }
         return nil
+    }
+
+    /// Sets scale degree labels and colors across visible octaves
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to label (default: all 1-7)
+    ///   - octaves: Range of octaves to apply labels to (default: 4...6)
+    ///   - colorProvider: Optional closure to provide color for each degree
+    public func setScaleDegreeLabels(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        colorProvider: ((Int) -> Color)? = nil
+    ) {
+        let rootNote = Note.value(for: key)
+        var labels: [Int: String] = [:]
+        var colors: [Int: Color] = [:]
+
+        for octave in octaves {
+            for degree in degrees where degree >= 1 && degree <= 7 {
+                let interval = Note.majorScaleIntervals[degree - 1]
+                let midiNote = (rootNote + interval) % 12 + (octave * 12)
+                labels[midiNote] = "\(degree)"
+                if let color = colorProvider?(degree) {
+                    colors[midiNote] = color
+                }
+            }
+        }
+
+        customNoteNames = labels
+        if !colors.isEmpty {
+            labelColors = colors
+        }
     }
 }
