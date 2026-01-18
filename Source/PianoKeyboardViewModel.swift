@@ -259,4 +259,30 @@ public class PianoKeyboardViewModel: ObservableObject {
             setScaleDegreeLabels(key: key, degrees: degrees, octaves: octaves, colorProvider: labelColorProvider)
         }
     }
+
+    /// Sets up touch highlighting for scale degrees
+    /// When a key is pressed, it will highlight with the color for its scale degree
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - colorProvider: Closure that returns a color for each scale degree (1-7)
+    ///   - defaultColor: Optional color for non-scale notes (nil = no highlight)
+    public func setupScaleTouchHighlighting(
+        key: String,
+        colorProvider: @escaping (Int) -> Color,
+        defaultColor: Color? = nil
+    ) {
+        touchHighlightColorProvider = { keyNumber in
+            if let degree = Note.scaleDegree(for: keyNumber, inKey: key) {
+                return colorProvider(degree)
+            }
+            return defaultColor
+        }
+
+        labelColorProvider = { keyNumber in
+            if let degree = Note.scaleDegree(for: keyNumber, inKey: key) {
+                return colorProvider(degree)
+            }
+            return nil
+        }
+    }
 }
