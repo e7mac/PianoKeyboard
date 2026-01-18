@@ -209,4 +209,54 @@ public class PianoKeyboardViewModel: ObservableObject {
             labelColors = colors
         }
     }
+
+    /// Sets key highlighting for scale degrees across visible octaves
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to highlight (default: all 1-7)
+    ///   - octaves: Range of octaves to apply highlights to (default: 4...6)
+    ///   - colorProvider: Closure providing color for each degree (1-7)
+    public func setScaleHighlighting(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        colorProvider: @escaping (Int) -> Color
+    ) {
+        let rootNote = Note.value(for: key)
+        var highlights: [Int: Color] = [:]
+
+        for octave in octaves {
+            for degree in degrees where degree >= 1 && degree <= 7 {
+                let interval = Note.majorScaleIntervals[degree - 1]
+                let midiNote = (rootNote + interval) % 12 + (octave * 12)
+                highlights[midiNote] = colorProvider(degree)
+            }
+        }
+
+        highlightedKeys = highlights
+    }
+
+    /// Configures the piano for scale display with both highlighting and labels
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to show (default: all 1-7)
+    ///   - octaves: Range of octaves to apply to (default: 4...6)
+    ///   - highlightColorProvider: Optional closure for key highlight colors
+    ///   - labelColorProvider: Optional closure for label colors
+    ///   - showDegreeLabels: Whether to show degree numbers as labels (default: true)
+    public func configureForScale(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        highlightColorProvider: ((Int) -> Color)? = nil,
+        labelColorProvider: ((Int) -> Color)? = nil,
+        showDegreeLabels: Bool = true
+    ) {
+        if let highlightProvider = highlightColorProvider {
+            setScaleHighlighting(key: key, degrees: degrees, octaves: octaves, colorProvider: highlightProvider)
+        }
+        if showDegreeLabels {
+            setScaleDegreeLabels(key: key, degrees: degrees, octaves: octaves, colorProvider: labelColorProvider)
+        }
+    }
 }
