@@ -13,7 +13,7 @@ public protocol PianoKeyboardDelegate: AnyObject {
 }
 
 public class PianoKeyboardViewModel: ObservableObject {
-    
+
     @Published public var keys: [PianoKeyViewModel] = []
     @Published public var keysPressed: [String] = []
     @Published public var highlightedKeys: [Int: Color] = [:]
@@ -26,6 +26,15 @@ public class PianoKeyboardViewModel: ObservableObject {
     @Published public var latch = false {
         didSet { reset() }
     }
+
+    /// Optional closure that provides a highlight color for touched keys.
+    /// When set, keys will automatically highlight with the returned color on touch.
+    /// Return nil for keys that should use default touch behavior.
+    public var touchHighlightColorProvider: ((Int) -> Color?)? = nil
+
+    /// Optional closure that provides a label color for keys.
+    /// Used to restore label color when touch ends.
+    public var labelColorProvider: ((Int) -> Color?)? = nil
 
     public var noteOffset: Int {
         didSet { configureKeys() }
@@ -107,11 +116,23 @@ public class PianoKeyboardViewModel: ObservableObject {
     }
 
     private func keyDown(_ number: Int) {
+        // Apply touch highlight if provider exists
+        if let provider = touchHighlightColorProvider, let color = provider(number) {
+            highlightedKeys[number] = color
+            labelColors[number] = .white
+        }
         keysPressed.append(Note.name(for: number))
         delegate?.pianoKeyDown(number)
     }
 
     private func keyUp(_ number: Int) {
+        // Remove touch highlight and restore label color
+        if touchHighlightColorProvider != nil {
+            highlightedKeys.removeValue(forKey: number)
+            if let provider = labelColorProvider, let color = provider(number) {
+                labelColors[number] = color
+            }
+        }
         let note = Note.name(for: number)
         guard let index = keysPressed.firstIndex(of: note) else {
             return
@@ -146,7 +167,7 @@ public class PianoKeyboardViewModel: ObservableObject {
         if showLabelsOnHighlight && highlightedKeys[noteNumber] == nil {
             return nil
         }
-        
+
         // Priority: custom names > note names > none
         if let customName = customNoteNames[noteNumber] {
             return customName
@@ -154,5 +175,88 @@ public class PianoKeyboardViewModel: ObservableObject {
             return Note.name(for: noteNumber, useFlats: useFlats, showOctaveNumber: showOctaveNumbers)
         }
         return nil
+    }
+
+    /// Sets scale degree labels and colors across visible octaves
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to label (default: all 1-7)
+    ///   - octaves: Range of octaves to apply labels to (default: 4...6)
+    ///   - colorProvider: Optional closure to provide color for each degree
+    public func setScaleDegreeLabels(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        colorProvider: ((Int) -> Color)? = nil
+    ) {
+        let rootNote = Note.value(for: key)
+        var labels: [Int: String] = [:]
+        var colors: [Int: Color] = [:]
+
+        for octave in octaves {
+            for degree in degrees where degree >= 1 && degree <= 7 {
+                let interval = Note.majorScaleIntervals[degree - 1]
+                let midiNote = (rootNote + interval) % 12 + (octave * 12)
+                labels[midiNote] = "\(degree)"
+                if let color = colorProvider?(degree) {
+                    colors[midiNote] = color
+                }
+            }
+        }
+
+        customNoteNames = labels
+        if !colors.isEmpty {
+            labelColors = colors
+        }
+    }
+
+    /// Sets key highlighting for scale degrees across visible octaves
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to highlight (default: all 1-7)
+    ///   - octaves: Range of octaves to apply highlights to (default: 4...6)
+    ///   - colorProvider: Closure providing color for each degree (1-7)
+    public func setScaleHighlighting(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        colorProvider: @escaping (Int) -> Color
+    ) {
+        let rootNote = Note.value(for: key)
+        var highlights: [Int: Color] = [:]
+
+        for octave in octaves {
+            for degree in degrees where degree >= 1 && degree <= 7 {
+                let interval = Note.majorScaleIntervals[degree - 1]
+                let midiNote = (rootNote + interval) % 12 + (octave * 12)
+                highlights[midiNote] = colorProvider(degree)
+            }
+        }
+
+        highlightedKeys = highlights
+    }
+
+    /// Configures the piano for scale display with both highlighting and labels
+    /// - Parameters:
+    ///   - key: The musical key (e.g., "C", "F#", "Bb")
+    ///   - degrees: Which scale degrees to show (default: all 1-7)
+    ///   - octaves: Range of octaves to apply to (default: 4...6)
+    ///   - highlightColorProvider: Optional closure for key highlight colors
+    ///   - labelColorProvider: Optional closure for label colors
+    ///   - showDegreeLabels: Whether to show degree numbers as labels (default: true)
+    public func configureForScale(
+        key: String,
+        degrees: [Int] = [1, 2, 3, 4, 5, 6, 7],
+        octaves: ClosedRange<Int> = 4...6,
+        highlightColorProvider: ((Int) -> Color)? = nil,
+        labelColorProvider: ((Int) -> Color)? = nil,
+        showDegreeLabels: Bool = true
+    ) {
+        if let highlightProvider = highlightColorProvider {
+            setScaleHighlighting(key: key, degrees: degrees, octaves: octaves, colorProvider: highlightProvider)
+        }
+        if showDegreeLabels {
+            setScaleDegreeLabels(key: key, degrees: degrees, octaves: octaves, colorProvider: labelColorProvider)
+        }
     }
 }
