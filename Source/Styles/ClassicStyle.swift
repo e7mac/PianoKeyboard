@@ -94,6 +94,11 @@ public struct ClassicStyle: KeyboardStyle {
                     let highlightPath = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius)
                         .path(in: rect)
                     context.fill(highlightPath, with: .color(highlightColor))
+
+                    // Add visible pressed effect overlay for white keys
+                    if key.touchDown {
+                        context.fill(highlightPath, with: .color(Color.black.opacity(0.3)))
+                    }
                 }
 
                 // Handle note names
@@ -161,6 +166,11 @@ public struct ClassicStyle: KeyboardStyle {
                     let highlightPath = RoundedCornersShape(corners: [.bottomLeft, .bottomRight], radius: cornerRadius / 2.0)
                         .path(in: insetRect)
                     context.fill(highlightPath, with: .color(highlightColor))
+
+                    // Add visible pressed effect overlay for black keys
+                    if key.touchDown {
+                        context.fill(highlightPath, with: .color(Color.white.opacity(0.3)))
+                    }
                 }
                 
                 // Draw note names on black keys
