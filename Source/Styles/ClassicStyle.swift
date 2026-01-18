@@ -98,8 +98,9 @@ public struct ClassicStyle: KeyboardStyle {
 
                 // Handle note names
                 if let noteName = viewModel.noteName(for: key.noteNumber) {
+                    let textColor = viewModel.labelColors[key.noteNumber]
                     context.draw(
-                        Text(noteName),
+                        Text(noteName).foregroundColor(textColor),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.85)
                     )
                 } else if showLabels {
@@ -164,8 +165,9 @@ public struct ClassicStyle: KeyboardStyle {
                 
                 // Draw note names on black keys
                 if let noteName = viewModel.noteName(for: key.noteNumber) {
+                    let textColor = viewModel.labelColors[key.noteNumber]
                     context.draw(
-                        Text(noteName),
+                        Text(noteName).foregroundColor(textColor),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height * 0.75)
                     )
                 }

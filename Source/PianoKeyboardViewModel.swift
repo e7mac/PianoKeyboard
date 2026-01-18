@@ -17,6 +17,7 @@ public class PianoKeyboardViewModel: ObservableObject {
     @Published public var keys: [PianoKeyViewModel] = []
     @Published public var keysPressed: [String] = []
     @Published public var highlightedKeys: [Int: Color] = [:]
+    @Published public var labelColors: [Int: Color] = [:]
     @Published public var showNoteNames: Bool = false
     @Published public var useFlats: Bool = false
     @Published public var showOctaveNumbers: Bool = false

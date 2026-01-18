@@ -65,8 +65,9 @@ public struct ModernStyle: KeyboardStyle {
 
                 // Handle note names
                 if let noteName = viewModel.noteName(for: key.noteNumber) {
+                    let textColor = viewModel.labelColors[key.noteNumber]
                     context.draw(
-                        Text(noteName),
+                        Text(noteName).foregroundColor(textColor),
                         at: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y + rect.height - 25)
                     )
                 } else if showLabels {
