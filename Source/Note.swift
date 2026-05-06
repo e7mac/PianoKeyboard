@@ -6,25 +6,41 @@
 //
 
 import Foundation
+import MusicTheory
 
+/// String/MIDI conversion helpers for note names. The public API is
+/// preserved verbatim from the original implementation so existing
+/// call sites (across RET, including ChordToMidiNotes and quiz
+/// generation) keep compiling unchanged.
+///
+/// Internally each function delegates to MusicCore's typed `Pitch`
+/// for the actual semitone math. Two consequences worth noting:
+/// - Spelling round-trips (`name → midi → name`) preserve sharp/flat
+///   choice via `preferSharps`. The legacy default for the no-arg
+///   `name(for:)` was sharps; `name(for:preferSharps:)` defaulted to
+///   flats. Both have been preserved.
+/// - The `value(for:)` table accepts a small set of one- and
+///   two-character key names (e.g. "C", "F#", "Bb"). MusicCore's
+///   accidental encoding maps `b/#` to `flat/sharp`, so the same
+///   inputs work.
 public struct Note {
+    /// Sharps spelling for each chromatic semitone.
     static let sharps = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+    /// Flats spelling for each chromatic semitone.
     static let flats  = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
-    /// Major scale intervals in semitones from root
+    /// Major scale intervals in semitones from root.
     public static let majorScaleIntervals = [0, 2, 4, 5, 7, 9, 11]
 
-    /// Convert a key name (e.g., "C", "F#", "Bb") to its semitone value (0-11)
+    /// Convert a key name (e.g., "C", "F#", "Bb") to its semitone value (0-11).
     public static func value(for keyName: String) -> Int {
-        let noteValues: [String: Int] = [
-            "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3,
-            "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8,
-            "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
-        ]
-        return noteValues[keyName] ?? 0
+        guard let pitch = parseKeyName(keyName) else { return 0 }
+        return pitch.chromaticIndex
     }
 
-    /// Get the scale degree (1-7) for a MIDI note in a given key, or nil if not in major scale
+    /// Get the scale degree (1-7) for a MIDI note in a given key, or
+    /// nil if the note is not in the major scale.
     public static func scaleDegree(for midiNote: Int, inKey keyName: String) -> Int? {
         let rootNote = value(for: keyName)
         let noteInScale = ((midiNote - rootNote) % 12 + 12) % 12
@@ -34,31 +50,88 @@ public struct Note {
         return nil
     }
 
+    /// Parse a name like "C4", "F#3", "Bb-1" to a MIDI number.
     public static func midiNumber(for name: String) -> Int {
-        let note: Substring
-        let octave: Int
-        if name.contains("-") {
-            note = name.dropLast(2)
-            octave = name.count > 3 ? Int(name.dropFirst(2)) ?? 0 : Int(name.dropFirst(1)) ?? 0
-        } else {
-            note = name.dropLast()
-            octave = name.count > 2 ? Int(name.dropFirst(2)) ?? 0 : Int(name.dropFirst(1)) ?? 0
-        }
-        let offset = [sharps.firstIndex(of: String(note)),flats.firstIndex(of: String(note))].compactMap { $0 }.first
-        return (12 + (octave * 12)) + (offset ?? 0)
+        // Split into note-portion and octave-portion. Octave can be
+        // negative (a leading "-"), so "Bb-1" must split as "Bb"/"-1".
+        guard let split = splitNoteAndOctave(name) else { return 0 }
+        let (noteName, octave) = split
+        let offset = sharps.firstIndex(of: noteName)
+                  ?? flats.firstIndex(of: noteName)
+                  ?? 0
+        return (12 + (octave * 12)) + offset
     }
 
+    /// MIDI → name with octave. Sharp spelling by default.
     public static func name(for midiNumber: Int, preferSharps: Bool = false) -> String {
-        let offset = midiNumber % 12
-        let octave = ((midiNumber - offset) / 12) - 1
-        let note = preferSharps ? sharps[offset] : flats[offset]
-        return note + String(octave)
+        let p = Pitch(midi: midiNumber, preferSharps: preferSharps)
+        let nameOnly = p.accidental == .flat
+            ? "\(p.pitchClass.letterName)b"
+            : (p.accidental == .sharp
+                ? "\(p.pitchClass.letterName)#"
+                : p.pitchClass.letterName)
+        return nameOnly + String(p.octave)
     }
-    
+
+    /// MIDI → name with optional octave suffix; opposite default to
+    /// the two-arg variant for back-compat with the original utility.
     public static func name(for midiNumber: Int, useFlats: Bool = false, showOctaveNumber: Bool = true) -> String {
-        let offset = midiNumber % 12
-        let octave = ((midiNumber - offset) / 12) - 1
-        let note = useFlats ? flats[offset] : sharps[offset]
-        return showOctaveNumber ? note + String(octave) : note
+        let p = Pitch(midi: midiNumber, preferSharps: !useFlats)
+        let suffix: String = {
+            switch p.accidental {
+            case .flat: return "b"
+            case .sharp: return "#"
+            default: return ""
+            }
+        }()
+        let nameOnly = "\(p.pitchClass.letterName)\(suffix)"
+        return showOctaveNumber ? nameOnly + String(p.octave) : nameOnly
+    }
+
+    // MARK: - Private helpers
+
+    /// Parse a key name (no octave) into a `Pitch` at octave 4. Accepts
+    /// "C", "F#", "Bb" formats.
+    private static func parseKeyName(_ name: String) -> Pitch? {
+        guard let first = name.first else { return nil }
+        let letter: PitchClass
+        switch first {
+        case "C", "c": letter = .c
+        case "D", "d": letter = .d
+        case "E", "e": letter = .e
+        case "F", "f": letter = .f
+        case "G", "g": letter = .g
+        case "A", "a": letter = .a
+        case "B", "b": letter = .b
+        default: return nil
+        }
+        let suffix = name.dropFirst()
+        let accidental: Accidental
+        switch suffix {
+        case "":   accidental = .natural
+        case "#":  accidental = .sharp
+        case "b":  accidental = .flat
+        default:   return nil
+        }
+        return Pitch(pitchClass: letter, accidental: accidental, octave: 4)
+    }
+
+    /// Split a name like "C4", "F#3", "Bb-1" into (note-portion, octave-int).
+    private static func splitNoteAndOctave(_ name: String) -> (String, Int)? {
+        var i = name.endIndex
+        // Walk backwards over digits and an optional leading minus.
+        while i > name.startIndex {
+            let prev = name.index(before: i)
+            let c = name[prev]
+            if c.isNumber || (c == "-" && prev > name.startIndex) {
+                i = prev
+                continue
+            }
+            break
+        }
+        guard i > name.startIndex, i < name.endIndex else { return nil }
+        let noteName = String(name[..<i])
+        guard let octave = Int(name[i...]) else { return nil }
+        return (noteName, octave)
     }
 }

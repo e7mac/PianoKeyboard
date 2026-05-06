@@ -1,10 +1,10 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
     name: "PianoKeyboard",
     platforms: [
-        .iOS("15.0")
+        .iOS(.v17),
     ],
     products: [
         .library(
@@ -12,10 +12,17 @@ let package = Package(
             targets: ["PianoKeyboard"]
         )
     ],
+    dependencies: [
+        // MusicCore is checked out alongside this repo. Path-pinned so
+        // editing the shared types doesn't require a tag bump.
+        .package(path: "../../../MusicCore"),
+    ],
     targets: [
         .target(
             name: "PianoKeyboard",
-            dependencies: [],
+            dependencies: [
+                .product(name: "MusicTheory", package: "MusicCore"),
+            ],
             path: "Source"
         ),
         .testTarget(
