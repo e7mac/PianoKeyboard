@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import MusicTheory
+@_exported import MusicTheory
 
 /// String/MIDI conversion helpers for note names. The public API is
 /// preserved verbatim from the original implementation so existing
