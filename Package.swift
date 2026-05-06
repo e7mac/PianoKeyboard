@@ -22,6 +22,7 @@ let package = Package(
             name: "PianoKeyboard",
             dependencies: [
                 .product(name: "MusicTheory", package: "MusicCore"),
+                .product(name: "AudioEngine", package: "MusicCore"),
             ],
             path: "Source"
         ),

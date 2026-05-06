@@ -7,6 +7,7 @@
 
 import Foundation
 @_exported import MusicTheory
+@_exported import AudioEngine
 
 /// String/MIDI conversion helpers for note names. The public API is
 /// preserved verbatim from the original implementation so existing
