@@ -13,9 +13,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        // MusicCore is checked out alongside this repo. Path-pinned so
-        // editing the shared types doesn't require a tag bump.
-        .package(path: "../../../MusicCore"),
+        .package(url: "https://github.com/e7mac/MusicCore.git", branch: "main"),
     ],
     targets: [
         .target(
