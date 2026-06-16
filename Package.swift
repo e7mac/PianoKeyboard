@@ -1,10 +1,13 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
     name: "PianoKeyboard",
+    // tools 6.0 is required for `.iOS(.v18)`. `swiftLanguageModes: [.v5]`
+    // (set below, after targets) keeps the source compiling in Swift 5 mode —
+    // it predates strict concurrency; only the manifest API needs newer tools.
     platforms: [
-        .iOS(.v17),
+        .iOS(.v18),
     ],
     products: [
         .library(
@@ -29,5 +32,6 @@ let package = Package(
             dependencies: [
                 "PianoKeyboard"
             ])
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
